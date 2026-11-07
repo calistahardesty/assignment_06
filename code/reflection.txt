@@ -5,3 +5,37 @@ terminology from this assignment (REST API, endpoint, HTTP status code,
 raise_for_status, API key, form data vs. JSON body, rate limit, caching,
 json_normalize, record_path, meta, grain, opinion mining, named-entity
 recognition, prompt, system prompt, reasoning model), and make it actionable.
+
+This assignment showed me how to use APIs to get information from text.
+Every API call follows the same steps: build the URL, put my API key in the
+X-API-KEY header, send the request, call raise_for_status(), and return the
+JSON. raise_for_status() is important because if something goes wrong, like
+a 401 for a bad key or a 429 for going over the rate limit, the error shows
+up right away instead of causing a confusing KeyError later. I also learned
+that the Azure endpoints take form data with data=, but the AI endpoints take
+JSON with json=, and the model settings go in the query string with params=.
+
+Keeping my API key safe was a new thing for me. I put it in a .env file
+instead of in my code, and since .env is in .gitignore, it never gets pushed
+to GitHub. Caching was also important because of the 150 requests per day
+limit. The extract steps call the API once and save the results, and after
+that the transform steps just read the cache, which made testing much faster.
+
+The hardest part was turning nested JSON into tables. For sentences_table,
+json_normalize with record_path, meta, and record_prefix did it in one call.
+But opinions_table was too deep, so I had to use nested loops and follow each
+target's ref to find its assessment words, like "overpriced" and "lukewarm"
+for the mocha latte. I also learned that opinion mining and named-entity
+recognition work better together, because opinion mining missed staff names
+like Otto and Pete, but the entity recognizer knew they were people.
+
+For the question box, pandas does the counting with a pivot table and the
+engineered net column, and the language model only writes the answer from
+those facts. This is called retrieval-augmented generation. I liked that the
+page refuses to ask the model when no reviews match, so it can't make
+something up.
+
+One thing that went wrong again was ruff saying my files had no newline at
+the end, which happened last assignment too. Next time I will run ruff check
+before every commit, not just at the end, and press Enter at the bottom of a
+file before saving.
